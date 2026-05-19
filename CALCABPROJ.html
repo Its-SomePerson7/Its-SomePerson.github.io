@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FTC Part 1 — Accumulation Functions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{--sky:#a8d8f0;--sky-deep:#5db3e8;--glass:rgba(255,255,255,0.55);--glass-border:rgba(255,255,255,0.75);--teal:#3abfbf;--green:#5ecf7a;--blue-deep:#2a7fc1;--blue-dark:#1a5b92;--text-dark:#1a3a52;--text-mid:#2e6082;--text-soft:#4a88b0;--shadow:0 8px 32px rgba(42,127,193,0.18),0 2px 8px rgba(42,127,193,0.10);--radius:20px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito Sans',sans-serif;background:linear-gradient(160deg,#c9e8f8 0%,#e0f4ff 30%,#b8e8d8 65%,#d8f0e8 100%);min-height:100vh;color:var(--text-dark);overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-120px;left:-120px;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(168,216,240,0.45) 0%,transparent 70%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-100px;right:-80px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(94,207,122,0.3) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.container{max-width:900px;margin:0 auto;padding:32px 20px 64px;position:relative;z-index:1;}
+.card{background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1.5px solid var(--glass-border);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px;margin-bottom:28px;transition:box-shadow 0.3s;}
+.card:hover{box-shadow:0 12px 40px rgba(42,127,193,0.22),0 3px 12px rgba(42,127,193,0.12);}
+.hero{background:linear-gradient(135deg,rgba(58,191,191,0.55) 0%,rgba(93,179,232,0.55) 50%,rgba(168,216,240,0.55) 100%);border:1.5px solid rgba(255,255,255,0.8);text-align:center;padding:48px 32px 40px;}
+.hero-badge{display:inline-block;background:rgba(255,255,255,0.7);border:1.5px solid rgba(255,255,255,0.9);border-radius:50px;padding:6px 20px;font-size:13px;font-weight:700;color:var(--blue-dark);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;}
+.hero h1{font-family:'Nunito',sans-serif;font-size:clamp(28px,5vw,48px);font-weight:800;color:var(--blue-dark);line-height:1.15;margin-bottom:12px;}
+.hero h1 span{color:var(--teal);}
+.hero-subtitle{font-size:17px;color:var(--text-mid);max-width:560px;margin:0 auto 20px;line-height:1.6;}
+.hero-objective{display:inline-block;background:rgba(255,255,255,0.65);border:1.5px solid rgba(255,255,255,0.85);border-radius:14px;padding:14px 24px;font-size:15px;color:var(--blue-dark);max-width:600px;line-height:1.5;}
+.hero-objective strong{color:var(--teal);font-weight:700;}
+.section-label{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.section-label .num{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue-deep));display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;color:white;flex-shrink:0;box-shadow:0 3px 10px rgba(42,127,193,0.25);}
+.section-label h2{font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;color:var(--text-dark);}
+.concept-box{background:rgba(255,255,255,0.6);border:1.5px solid rgba(255,255,255,0.85);border-radius:16px;padding:22px 24px;margin-bottom:18px;}
+.concept-box h3{font-family:'Nunito',sans-serif;font-weight:700;font-size:17px;color:var(--blue-dark);margin-bottom:10px;}
+.concept-box p{font-size:15.5px;line-height:1.7;color:var(--text-mid);}
+.highlight-box{background:linear-gradient(120deg,rgba(58,191,191,0.18),rgba(93,179,232,0.18));border:1.5px solid rgba(58,191,191,0.4);border-radius:16px;padding:22px 24px;margin:20px 0;text-align:center;}
+.highlight-box .math-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--teal);margin-bottom:10px;}
+.nav-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.nav-tab{padding:10px 20px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.7);background:rgba(255,255,255,0.45);font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;color:var(--text-mid);cursor:pointer;transition:all 0.2s;}
+.nav-tab:hover{background:rgba(255,255,255,0.7);color:var(--blue-dark);}
+.nav-tab.active{background:linear-gradient(135deg,var(--teal),var(--blue-deep));color:white;border-color:transparent;box-shadow:0 4px 14px rgba(42,127,193,0.28);}
+.tab-content{display:none;}.tab-content.active{display:block;}
+.step{display:flex;gap:16px;margin-bottom:16px;align-items:flex-start;}
+.step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--sky-deep),var(--blue-deep));display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;color:white;flex-shrink:0;margin-top:2px;box-shadow:0 2px 8px rgba(42,127,193,0.22);}
+.step-content{flex:1;}.step-content p{font-size:15px;line-height:1.65;color:var(--text-mid);}
+.derivative-highlight{background:linear-gradient(120deg,rgba(94,207,122,0.2),rgba(58,191,191,0.2));border-left:4px solid var(--teal);border-radius:0 12px 12px 0;padding:14px 20px;margin:14px 0;}
+.interactive-wrapper{background:rgba(255,255,255,0.5);border:1.5px solid rgba(255,255,255,0.8);border-radius:16px;padding:24px;margin-top:18px;}
+.slider-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
+.slider-row label{font-size:14px;font-weight:700;color:var(--text-dark);min-width:140px;}
+input[type=range]{flex:1;min-width:120px;accent-color:var(--teal);cursor:pointer;}
+canvas{border-radius:12px;display:block;}
+.info-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;}
+.info-chip{flex:1;min-width:140px;background:rgba(255,255,255,0.65);border:1.5px solid rgba(255,255,255,0.85);border-radius:14px;padding:14px 16px;text-align:center;}
+.info-chip .chip-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-soft);margin-bottom:4px;}
+.info-chip .chip-value{font-family:'Nunito',sans-serif;font-weight:800;font-size:22px;color:var(--blue-dark);}
+.rw-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:16px;}
+.rw-card{background:rgba(255,255,255,0.6);border:1.5px solid rgba(255,255,255,0.85);border-radius:16px;padding:20px;}
+.rw-card .rw-icon{font-size:28px;margin-bottom:10px;}
+.rw-card h4{font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:var(--blue-dark);margin-bottom:6px;}
+.rw-card p{font-size:14px;color:var(--text-mid);line-height:1.55;}
+.quiz-problem{background:rgba(255,255,255,0.55);border:1.5px solid rgba(255,255,255,0.8);border-radius:16px;padding:24px;margin-bottom:18px;transition:all 0.3s;}
+.quiz-problem.correct{background:rgba(94,207,122,0.2);border-color:rgba(94,207,122,0.5);}
+.quiz-problem.incorrect{background:rgba(232,90,90,0.12);border-color:rgba(232,90,90,0.35);}
+.quiz-q{font-size:15.5px;font-weight:600;color:var(--text-dark);margin-bottom:14px;line-height:1.55;}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.quiz-opt{padding:10px 16px;border-radius:12px;border:1.5px solid rgba(93,179,232,0.4);background:rgba(255,255,255,0.55);font-size:14.5px;color:var(--text-mid);cursor:pointer;transition:all 0.18s;text-align:center;font-family:'Nunito Sans',sans-serif;}
+.quiz-opt:hover{background:rgba(168,216,240,0.45);border-color:var(--sky-deep);color:var(--blue-dark);}
+.quiz-opt.selected-correct{background:rgba(94,207,122,0.35);border-color:var(--green);color:#1a6b35;font-weight:700;}
+.quiz-opt.selected-wrong{background:rgba(232,90,90,0.2);border-color:#e85a5a;color:#7a1818;font-weight:700;}
+.quiz-opt.reveal-correct{background:rgba(94,207,122,0.2);border-color:var(--green);color:#1a6b35;}
+.quiz-opt:disabled{cursor:default;pointer-events:none;}
+.quiz-feedback{display:none;font-size:14px;line-height:1.55;border-radius:10px;padding:12px 16px;}
+.quiz-feedback.show{display:block;}
+.quiz-feedback.fb-correct{background:rgba(94,207,122,0.25);color:#185c2e;border:1px solid rgba(94,207,122,0.4);}
+.quiz-feedback.fb-wrong{background:rgba(232,90,90,0.15);color:#7a1818;border:1px solid rgba(232,90,90,0.3);}
+.score-display{background:linear-gradient(135deg,rgba(58,191,191,0.3),rgba(93,179,232,0.3));border:1.5px solid rgba(255,255,255,0.7);border-radius:16px;padding:20px 28px;text-align:center;margin-top:20px;display:none;}
+.score-display.show{display:block;}
+.score-display h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:24px;color:var(--blue-dark);margin-bottom:6px;}
+.score-display p{font-size:15px;color:var(--text-mid);}
+.footer{text-align:center;padding:24px;font-size:13px;color:var(--text-soft);opacity:0.8;}
+@media(max-width:600px){.card{padding:20px 16px;}.quiz-options{grid-template-columns:1fr;}.info-row{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="card hero">
+  <div class="hero-badge">AP Calculus AB &middot; FTC Part 1</div>
+  <h1>The Fundamental Theorem<br>of Calculus <span>Part 1</span></h1>
+  <p class="hero-subtitle">Discover the beautiful connection between derivatives and integrals &mdash; two ideas that seem completely different, but are secretly inverses of each other.</p>
+  <div class="hero-objective">
+    <strong>Learning Objective:</strong> After using this, you should be able to differentiate accumulation functions of the form \(F(x)=\int_a^x f(t)\,dt\) and apply FTC Part 1 &mdash; including chain rule extensions.
+  </div>
+  <p style="margin-top:14px;font-size:13px;color:var(--text-soft);">Made by [Your Name] &middot; AP Calculus AB</p>
+</div>
+
+<div class="card">
+  <div class="section-label"><div class="num">1</div><h2>The Big Idea</h2></div>
+  <div class="concept-box">
+    <h3>What is an accumulation function?</h3>
+    <p>Imagine tracking how much water fills a tank. The <em>rate</em> of flow changes over time. An <strong>accumulation function</strong> \(F(x)\) tells you the <em>total amount collected</em> from a starting time \(a\) up to time \(x\).</p>
+    <p style="margin-top:10px;">Mathematically: \(F(x)=\displaystyle\int_a^x f(t)\,dt\), where \(f(t)\) is the rate function.</p>
+  </div>
+  <div class="highlight-box">
+    <div class="math-label">Fundamental Theorem of Calculus &mdash; Part 1</div>
+    \[\frac{d}{dx}\!\left[\int_a^x f(t)\,dt\right]=f(x)\]
+    <p style="margin-top:12px;font-size:14.5px;color:var(--text-mid);">If \(f\) is continuous on \([a,b]\) and \(F(x)=\int_a^x f(t)\,dt\), then \(F'(x)=f(x)\).</p>
+  </div>
+  <div class="concept-box">
+    <h3>In plain English&hellip;</h3>
+    <p>Integrating \(f\) from a fixed point \(a\) to a variable upper limit \(x\), then differentiating with respect to \(x\), simply gives you \(f(x)\) back. Integration and differentiation undo each other.</p>
+  </div>
+  <div class="concept-box">
+    <h3>Why does this make sense intuitively?</h3>
+    <p>When \(x\) increases by a tiny \(\Delta x\), the new sliver of area added is roughly \(f(x)\cdot\Delta x\). So \(\tfrac{\Delta A}{\Delta x}\approx f(x)\), and as \(\Delta x\to 0\) this becomes exactly \(f(x)\).</p>
+  </div>
+  <div class="concept-box">
+    <h3>The Chain Rule Extension</h3>
+    <p>When the upper limit is a function \(g(x)\):</p>
+    \[\frac{d}{dx}\!\left[\int_a^{g(x)}f(t)\,dt\right]=f(g(x))\cdot g'(x)\]
+    <p style="margin-top:8px;"><strong>Both limits variable?</strong> Split with a constant \(c\): \(\int_{h(x)}^{g(x)}=\int_c^{g(x)}-\int_c^{h(x)}\), then apply the chain rule to each piece.</p>
+  </div>
+  <div class="concept-box">
+    <h3>Variable in the lower limit?</h3>
+    <p>Flip limits and negate: \(\dfrac{d}{dx}\displaystyle\int_x^a f(t)\,dt=-f(x)\).</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-label"><div class="num">2</div><h2>Worked Examples</h2></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tab-ex1">Example 1 &mdash; Basic</button>
+    <button class="nav-tab"        id="tab-ex2">Example 2 &mdash; Chain Rule</button>
+    <button class="nav-tab"        id="tab-ex3">Example 3 &mdash; Variable Lower Limit</button>
+  </div>
+
+  <div id="ex1" class="tab-content active">
+    <div class="concept-box" style="margin-bottom:18px;"><h3>Problem</h3><p>Let \(F(x)=\displaystyle\int_1^x(3t^2+2)\,dt\). Find \(F'(x)\).</p></div>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><p><strong>Identify the setup.</strong> \(f(t)=3t^2+2\). Upper limit is just \(x\); lower limit is the constant \(a=1\). FTC Part 1 applies directly.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><p><strong>Check continuity.</strong> \(f(t)=3t^2+2\) is a polynomial &mdash; continuous everywhere. FTC applies on any interval.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><p><strong>Apply FTC Part 1.</strong> Plug \(x\) in for \(t\):</p>\[F'(x)=f(x)=3x^2+2\]</div></div>
+    <div class="derivative-highlight"><strong>Answer:</strong> \(F'(x)=3x^2+2\)<br><small style="color:var(--text-mid)">We never evaluated the integral! FTC Part 1 lets us skip that entirely.</small></div>
+  </div>
+
+  <div id="ex2" class="tab-content">
+    <div class="concept-box" style="margin-bottom:18px;"><h3>Problem</h3><p>Let \(G(x)=\displaystyle\int_0^{x^3}\sin(t)\,dt\). Find \(G'(x)\).</p></div>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><p><strong>Identify the setup.</strong> The upper limit is \(g(x)=x^3\), not just \(x\). We need the <em>chain rule extension</em>.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><p><strong>Find \(g'(x)\).</strong> \(g(x)=x^3\Rightarrow g'(x)=3x^2\).</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><p><strong>Apply the chain rule formula:</strong></p>\[G'(x)=f(g(x))\cdot g'(x)=\sin(x^3)\cdot 3x^2\]</div></div>
+    <div class="derivative-highlight"><strong>Answer:</strong> \(G'(x)=3x^2\sin(x^3)\)<br><small style="color:var(--text-mid)">Substitute \(g(x)\) into \(f(t)\), then multiply by \(g'(x)\).</small></div>
+  </div>
+
+  <div id="ex3" class="tab-content">
+    <div class="concept-box" style="margin-bottom:18px;"><h3>Problem</h3><p>Let \(H(x)=\displaystyle\int_x^5 e^{t^2}\,dt\). Find \(H'(x)\).</p></div>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><p><strong>Variable is in the lower limit.</strong> Use: \(\displaystyle\int_x^5 f(t)\,dt=-\int_5^x f(t)\,dt\).</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><p>Rewrite: \(H(x)=-\displaystyle\int_5^x e^{t^2}\,dt\).</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><p><strong>Apply FTC Part 1 with the negative sign:</strong></p>\[H'(x)=-e^{x^2}\]</div></div>
+    <div class="derivative-highlight"><strong>Answer:</strong> \(H'(x)=-e^{x^2}\)<br><small style="color:var(--text-mid)">Swapping limits introduces a negative sign. Don&rsquo;t forget it!</small></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-label"><div class="num">3</div><h2>Interactive Accumulator</h2></div>
+  <p style="font-size:15px;color:var(--text-mid);margin-bottom:16px;">Drag the slider to move \(x\). The shaded area is \(F(x)=\int_0^x f(t)\,dt\). The purple dot shows \(F'(x)=f(x)\) at your chosen \(x\).</p>
+  <div class="interactive-wrapper">
+    <div class="slider-row">
+      <label>Choose \(f(t)\):</label>
+      <select id="fnSelect" style="padding:8px 14px;border-radius:10px;border:1.5px solid rgba(93,179,232,0.5);background:rgba(255,255,255,0.7);font-family:'Nunito Sans',sans-serif;font-size:14px;color:var(--text-dark);cursor:pointer;">
+        <option value="sin">f(t) = sin(t)</option>
+        <option value="t2">f(t) = t&sup2;</option>
+        <option value="cos">f(t) = cos(t)</option>
+        <option value="lin">f(t) = 2t + 1</option>
+        <option value="neg">f(t) = t&sup2; &minus; 2</option>
+      </select>
+    </div>
+    <div class="slider-row">
+      <label>Upper limit \(x\) = <span id="xValDisp" style="color:var(--teal);">2.00</span></label>
+      <input type="range" id="xSlider" min="-3.14" max="3.14" step="0.05" value="2.0">
+    </div>
+    <canvas id="mainCanvas" width="840" height="300" style="width:100%;max-width:840px;"></canvas>
+    <div class="info-row">
+      <div class="info-chip"><div class="chip-label">Current x</div><div class="chip-value" id="chipX">2.00</div></div>
+      <div class="info-chip"><div class="chip-label">F(x) = area</div><div class="chip-value" id="chipF">&mdash;</div></div>
+      <div class="info-chip"><div class="chip-label">F'(x) = f(x)</div><div class="chip-value" id="chipFp">&mdash;</div></div>
+    </div>
+    <p style="margin-top:14px;font-size:13px;color:var(--text-soft);text-align:center;">Notice: F'(x) always equals f(x) &mdash; the height of the curve at x. That&rsquo;s FTC Part 1 in action.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-label"><div class="num">4</div><h2>Real-World Applications</h2></div>
+  <p style="font-size:15px;color:var(--text-mid);margin-bottom:4px;">FTC Part 1 describes how accumulation and rate of change interact everywhere in science and daily life.</p>
+  <div class="rw-grid">
+    <div class="rw-card"><div class="rw-icon">&#127754;</div><h4>Water Tank Volume</h4><p>If \(f(t)\) is the flow rate (L/min), then \(F(x)=\int_0^x f(t)\,dt\) is total volume at time \(x\). FTC says \(F'(x)=f(x)\): rate of fill equals current flow rate.</p></div>
+    <div class="rw-card"><div class="rw-icon">&#128663;</div><h4>Position &amp; Velocity</h4><p>If \(v(t)\) is a car&rsquo;s velocity, then \(x(t)=\int_0^t v(s)\,ds\) gives position. FTC confirms \(x'(t)=v(t)\) &mdash; position&rsquo;s derivative is velocity.</p></div>
+    <div class="rw-card"><div class="rw-icon">&#128138;</div><h4>Drug Concentration</h4><p>\(C(x)=\int_0^x r(t)\,dt\) tracks total drug absorbed. FTC tells doctors \(C'(x)=r(x)\), the current absorption rate, helping adjust dosages.</p></div>
+    <div class="rw-card"><div class="rw-icon">&#9728;</div><h4>Solar Energy</h4><p>\(E(x)=\int_6^x P(t)\,dt\) gives total kWh since 6 AM. FTC says \(E'(x)=P(x)\): the power output right now equals the current rate of energy collection.</p></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-label"><div class="num">5</div><h2>Practice Problems</h2></div>
+  <p style="font-size:15px;color:var(--text-mid);margin-bottom:20px;">Select an answer for immediate feedback and an explanation.</p>
+
+  <div class="quiz-problem" id="q1">
+    <div class="quiz-q">1. Let \(F(x)=\displaystyle\int_2^x(5t^4-3)\,dt\). What is \(F'(x)\)?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="q1" data-verdict="wrong">\(t^5-3t+C\)</button>
+      <button class="quiz-opt" data-q="q1" data-verdict="correct">\(5x^4-3\)</button>
+      <button class="quiz-opt" data-q="q1" data-verdict="wrong">\(5x^5-3x\)</button>
+      <button class="quiz-opt" data-q="q1" data-verdict="wrong">\(20x^3\)</button>
+    </div>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-problem" id="q2">
+    <div class="quiz-q">2. Let \(G(x)=\displaystyle\int_0^{x^2}\cos(t)\,dt\). What is \(G'(x)\)?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="q2" data-verdict="wrong">\(\cos(x)\)</button>
+      <button class="quiz-opt" data-q="q2" data-verdict="wrong">\(\cos(x^2)\)</button>
+      <button class="quiz-opt" data-q="q2" data-verdict="correct">\(2x\cos(x^2)\)</button>
+      <button class="quiz-opt" data-q="q2" data-verdict="wrong">\(-\sin(x^2)\cdot 2x\)</button>
+    </div>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-problem" id="q3">
+    <div class="quiz-q">3. Let \(H(x)=\displaystyle\int_x^4\sqrt{t^3+1}\,dt\). What is \(H'(x)\)?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="q3" data-verdict="wrong">\(\sqrt{x^3+1}\)</button>
+      <button class="quiz-opt" data-q="q3" data-verdict="correct">\(-\sqrt{x^3+1}\)</button>
+      <button class="quiz-opt" data-q="q3" data-verdict="wrong">\(\sqrt{4^3+1}\)</button>
+      <button class="quiz-opt" data-q="q3" data-verdict="wrong">\(\dfrac{3x^2}{2\sqrt{x^3+1}}\)</button>
+    </div>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-problem" id="q4">
+    <div class="quiz-q">4. \(F(x)=\displaystyle\int_1^x f(t)\,dt\) where \(f(3)=9\). What is \(F'(3)\)?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="q4" data-verdict="wrong">\(26\)</button>
+      <button class="quiz-opt" data-q="q4" data-verdict="wrong">\(6\)</button>
+      <button class="quiz-opt" data-q="q4" data-verdict="correct">\(9\)</button>
+      <button class="quiz-opt" data-q="q4" data-verdict="wrong">\(3\)</button>
+    </div>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div class="quiz-problem" id="q5">
+    <div class="quiz-q">5. Let \(K(x)=\displaystyle\int_{\sin x}^{x^2}e^t\,dt\). What is \(K'(x)\)?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="q5" data-verdict="wrong">\(e^{x^2}-e^{\sin x}\)</button>
+      <button class="quiz-opt" data-q="q5" data-verdict="correct">\(2x\,e^{x^2}-\cos(x)\,e^{\sin x}\)</button>
+      <button class="quiz-opt" data-q="q5" data-verdict="wrong">\(e^{x^2}\cdot 2x\)</button>
+      <button class="quiz-opt" data-q="q5" data-verdict="wrong">\(2x\,e^{x^2}+\cos(x)\,e^{\sin x}\)</button>
+    </div>
+    <div class="quiz-feedback" id="q5-fb"></div>
+  </div>
+
+  <div class="score-display" id="scoreDisplay">
+    <h3 id="scoreText">&mdash;</h3>
+    <p id="scoreSub">&mdash;</p>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Built with AI &middot; AP Calculus AB Final Project &middot; FTC Part 1</p>
+  <p style="margin-top:4px;font-size:12px;">Math rendered with KaTeX &middot; Visualizations in Canvas</p>
+</div>
+</div><!-- /container -->
+
+<script>
+// All feedback strings stored as plain text — KaTeX will render them after injection
+var FB = {
+  q1: {
+    correct: 'Correct! FTC Part 1: just substitute \\(x\\) for \\(t\\) in the integrand. No integration needed.',
+    wrong:   'Remember FTC Part 1: \\(\\frac{d}{dx}\\int_a^x f(t)\\,dt = f(x)\\). Just plug \\(x\\) into \\(f(t)=5t^4-3\\).'
+  },
+  q2: {
+    correct: 'Correct! Upper limit is \\(x^2\\), so use the chain rule: \\(f(x^2)\\cdot(x^2)\'=\\cos(x^2)\\cdot 2x\\).',
+    wrong:   'The upper limit is \\(x^2\\), not \\(x\\). Apply the chain rule: \\(f(g(x))\\cdot g\'(x)=\\cos(x^2)\\cdot 2x\\).'
+  },
+  q3: {
+    correct: 'Correct! Variable in lower limit: flip limits for a negative sign, giving \\(H\'(x)=-\\sqrt{x^3+1}\\).',
+    wrong:   '\\(x\\) is in the lower limit. Flip the limits (this adds a negative sign) then apply FTC.'
+  },
+  q4: {
+    correct: 'Correct! By FTC Part 1, \\(F\'(x)=f(x)\\), so \\(F\'(3)=f(3)=9\\). No integration needed!',
+    wrong:   'By FTC Part 1, \\(F\'(x)=f(x)\\). So \\(F\'(3)=f(3)=9\\). The derivative of the accumulation function is just the integrand evaluated at \\(x\\).'
+  },
+  q5: {
+    correct: 'Correct! Split at a constant \\(c\\): \\(\\int_{\\sin x}^{x^2}=\\int_c^{x^2}-\\int_c^{\\sin x}\\). Chain rule on each: \\(e^{x^2}\\cdot 2x - e^{\\sin x}\\cdot\\cos x\\).',
+    wrong:   'Both limits are functions of \\(x\\). Split at any constant \\(c\\), giving \\(\\int_c^{x^2}-\\int_c^{\\sin x}\\). Apply the chain rule to each part; the lower-limit piece gets a negative sign.'
+  }
+};
+
+var DELIMITERS = [
+  {left: '\\(', right: '\\)', display: false},
+  {left: '\\[', right: '\\]', display: true}
+];
+
+function renderEl(el) {
+  renderMathInElement(el, {delimiters: DELIMITERS, throwOnError: false});
+}
+
+// ── INIT ON LOAD ─────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  renderMathInElement(document.body, {delimiters: DELIMITERS, throwOnError: false});
+  initTabs();
+  initCanvas();
+  initQuiz();
+});
+
+// ── TABS ─────────────────────────────────────────
+function initTabs() {
+  ['ex1','ex2','ex3'].forEach(function(id) {
+    document.getElementById('tab-' + id).addEventListener('click', function() {
+      ['ex1','ex2','ex3'].forEach(function(t) {
+        document.getElementById(t).classList.remove('active');
+        document.getElementById('tab-' + t).classList.remove('active');
+      });
+      document.getElementById(id).classList.add('active');
+      this.classList.add('active');
+      renderEl(document.getElementById(id));
+    });
+  });
+}
+
+// ── CANVAS ───────────────────────────────────────
+var canvas, ctx, currentX = 2.0;
+var FNS = {
+  sin: {f: function(t){return Math.sin(t);}, xMin:-3.14, xMax:3.14},
+  t2:  {f: function(t){return t*t;},         xMin:-2,    xMax:3},
+  cos: {f: function(t){return Math.cos(t);}, xMin:-3.14, xMax:3.14},
+  lin: {f: function(t){return 2*t+1;},       xMin:-2,    xMax:3},
+  neg: {f: function(t){return t*t-2;},       xMin:-2,    xMax:3}
+};
+
+function integrate(f, a, b) {
+  if (a === b) return 0;
+  var n=800, h=(b-a)/n, s=0;
+  for (var i=0;i<n;i++) s += f(a+(i+0.5)*h);
+  return s*h;
+}
+
+function redraw() {
+  var key = document.getElementById('fnSelect').value;
+  var fn  = FNS[key], f = fn.f;
+  var xLo = fn.xMin, xHi = fn.xMax;
+  var W=canvas.width, H=canvas.height;
+  var PL=52,PR=20,PT=24,PB=44;
+  var PW=W-PL-PR, PH=H-PT-PB;
+  var N=300, dx=(xHi-xLo)/N;
+  var yMn=Infinity, yMx=-Infinity;
+  for (var i=0;i<=N;i++){var v=f(xLo+i*dx);if(v<yMn)yMn=v;if(v>yMx)yMx=v;}
+  var yP=(yMx-yMn)*0.15||0.5; yMn-=yP; yMx+=yP;
+  function tx(x){return PL+(x-xLo)/(xHi-xLo)*PW;}
+  function ty(y){return PT+(1-(y-yMn)/(yMx-yMn))*PH;}
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='rgba(255,255,255,0.35)';
+  ctx.beginPath();ctx.roundRect(0,0,W,H,12);ctx.fill();
+  // shade
+  var bX=Math.max(xLo,Math.min(xHi,0)), eX=Math.max(xLo,Math.min(xHi,currentX));
+  var yZ=ty(0);
+  ctx.save();ctx.beginPath();ctx.moveTo(tx(bX),yZ);
+  var a2=Math.min(bX,eX),b2=Math.max(bX,eX),sd=(b2-a2)/400;
+  for(var j=0;j<=400;j++) ctx.lineTo(tx(a2+j*sd),ty(f(a2+j*sd)));
+  ctx.lineTo(tx(eX),yZ);ctx.closePath();
+  var gr=ctx.createLinearGradient(0,PT,0,H-PB);
+  if(currentX>=0){gr.addColorStop(0,'rgba(58,191,191,0.55)');gr.addColorStop(1,'rgba(93,179,232,0.25)');}
+  else{gr.addColorStop(0,'rgba(232,90,90,0.45)');gr.addColorStop(1,'rgba(232,90,90,0.18)');}
+  ctx.fillStyle=gr;ctx.fill();ctx.restore();
+  // grid
+  ctx.strokeStyle='rgba(100,160,200,0.18)';ctx.lineWidth=1;
+  for(var g=0;g<=5;g++){
+    var yv=yMn+g*(yMx-yMn)/5, cy=ty(yv);
+    ctx.beginPath();ctx.moveTo(PL,cy);ctx.lineTo(PL+PW,cy);ctx.stroke();
+    ctx.fillStyle='rgba(42,96,130,0.6)';ctx.font='11px Nunito Sans';ctx.textAlign='right';
+    ctx.fillText(yv.toFixed(1),PL-6,cy+4);
+  }
+  // axes
+  ctx.strokeStyle='rgba(42,127,193,0.5)';ctx.lineWidth=1.5;
+  if(yZ>=PT&&yZ<=PT+PH){ctx.beginPath();ctx.moveTo(PL,yZ);ctx.lineTo(PL+PW,yZ);ctx.stroke();}
+  var yAX=tx(0);
+  if(yAX>=PL&&yAX<=PL+PW){ctx.beginPath();ctx.moveTo(yAX,PT);ctx.lineTo(yAX,PT+PH);ctx.stroke();}
+  // ticks
+  ctx.fillStyle='rgba(42,96,130,0.7)';ctx.font='11px Nunito Sans';ctx.textAlign='center';
+  for(var xv=Math.ceil(xLo);xv<=Math.floor(xHi);xv++){
+    var cxv=tx(xv),cy2=Math.min(Math.max(yZ,PT+PH-20),PT+PH);
+    ctx.fillText(xv,cxv,cy2+16);
+    ctx.beginPath();ctx.moveTo(cxv,cy2-3);ctx.lineTo(cxv,cy2+3);
+    ctx.strokeStyle='rgba(42,127,193,0.4)';ctx.lineWidth=1;ctx.stroke();
+  }
+  // curve
+  ctx.beginPath();ctx.moveTo(tx(xLo),ty(f(xLo)));
+  for(var k=1;k<=N;k++) ctx.lineTo(tx(xLo+k*dx),ty(f(xLo+k*dx)));
+  ctx.strokeStyle='#2a7fc1';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke();
+  // dashed line
+  var cxL=tx(currentX);
+  ctx.setLineDash([6,4]);ctx.strokeStyle='rgba(58,191,191,0.7)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(cxL,PT);ctx.lineTo(cxL,PT+PH);ctx.stroke();
+  ctx.setLineDash([]);
+  // dot
+  var cxD=Math.max(xLo,Math.min(xHi,currentX));
+  ctx.beginPath();ctx.arc(tx(cxD),ty(f(cxD)),8,0,Math.PI*2);
+  ctx.fillStyle='#8b5cf6';ctx.fill();ctx.strokeStyle='white';ctx.lineWidth=2.5;ctx.stroke();
+  // labels
+  ctx.font='bold 13px Nunito';ctx.fillStyle='#2a7fc1';ctx.textAlign='left';
+  ctx.fillText('f(t)',PL+4,PT+16);
+  ctx.fillStyle='rgba(58,191,191,0.9)';
+  ctx.fillText('x = '+currentX.toFixed(2),cxL+5,PT+18);
+  // chips
+  document.getElementById('chipX').textContent  = currentX.toFixed(2);
+  document.getElementById('chipF').textContent  = integrate(f,0,currentX).toFixed(3);
+  document.getElementById('chipFp').textContent = f(cxD).toFixed(3);
+}
+
+function initCanvas() {
+  canvas = document.getElementById('mainCanvas');
+  ctx    = canvas.getContext('2d');
+  document.getElementById('xSlider').addEventListener('input', function() {
+    currentX = parseFloat(this.value);
+    document.getElementById('xValDisp').textContent = currentX.toFixed(2);
+    redraw();
+  });
+  document.getElementById('fnSelect').addEventListener('change', function() {
+    var fn = FNS[this.value];
+    var sl = document.getElementById('xSlider');
+    sl.min = fn.xMin; sl.max = fn.xMax;
+    currentX = Math.max(fn.xMin, Math.min(fn.xMax, currentX));
+    sl.value = currentX;
+    document.getElementById('xValDisp').textContent = currentX.toFixed(2);
+    redraw();
+  });
+  redraw();
+}
+
+// ── QUIZ ─────────────────────────────────────────
+var answered = {}, totalAnswered = 0, totalCorrect = 0;
+
+function initQuiz() {
+  document.querySelectorAll('.quiz-opt').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var qId    = this.getAttribute('data-q');
+      var verdict = this.getAttribute('data-verdict');
+      if (answered[qId]) return;
+      answered[qId] = true;
+      totalAnswered++;
+      var card = document.getElementById(qId);
+      var fb   = document.getElementById(qId + '-fb');
+      card.querySelectorAll('.quiz-opt').forEach(function(o){ o.disabled = true; });
+      if (verdict === 'correct') {
+        totalCorrect++;
+        this.classList.add('selected-correct');
+        card.classList.add('correct');
+        fb.textContent = FB[qId].correct;
+        fb.className   = 'quiz-feedback show fb-correct';
+      } else {
+        this.classList.add('selected-wrong');
+        card.classList.add('incorrect');
+        fb.textContent = FB[qId].wrong;
+        fb.className   = 'quiz-feedback show fb-wrong';
+        card.querySelectorAll('.quiz-opt').forEach(function(o){
+          if (o.getAttribute('data-verdict') === 'correct') o.classList.add('reveal-correct');
+        });
+      }
+      renderEl(fb);
+      if (totalAnswered === 5) {
+        var sc = document.getElementById('scoreDisplay');
+        sc.classList.add('show');
+        var pct = Math.round(totalCorrect/5*100);
+        document.getElementById('scoreText').textContent = totalCorrect + ' / 5 \u2014 ' + pct + '%';
+        var msgs = [
+          [5,'Perfect score! You have mastered FTC Part 1.'],
+          [4,'Excellent! Just review the one you missed.'],
+          [3,'Solid understanding! Re-read the chain rule extension.'],
+          [2,'Good effort. Review the worked examples and try again.'],
+          [0,'Keep going! Start with the concept section and examples.']
+        ];
+        for (var m=0;m<msgs.length;m++){
+          if(totalCorrect>=msgs[m][0]){document.getElementById('scoreSub').textContent=msgs[m][1];break;}
+        }
+      }
+    });
+  });
+}
+</script>
+</body>
+</html>
